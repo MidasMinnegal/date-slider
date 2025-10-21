@@ -21,6 +21,7 @@ function App() {
   const [hoveredButton, setHoveredButton] = useState<EndButton | null>(null);
   
   const rafIdRef = useRef<number | null>(null);
+  const targetDistanceRef = useRef<number | null>(null);
   
   useEffect(() => {
     const updateDimensions = () => {
@@ -53,7 +54,7 @@ function App() {
     const initialMarker: Marker = {
       position: positionFromDistance(100, initialPath.lut),
       pathDistance: 100,
-      date: distanceToDate(100),
+      date: distanceToDate(100, initialPath.startOffset),
       isDragging: false,
       dragOffset: { x: 0, y: 0 }
     };
@@ -104,7 +105,28 @@ function App() {
         });
       }
       
-      if (markerCtx && marker) {
+      if (markerCtx && marker && path) {
+        if (marker.isDragging && targetDistanceRef.current !== null) {
+          const currentDistance = marker.pathDistance;
+          const targetDistance = targetDistanceRef.current;
+          const distanceDiff = targetDistance - currentDistance;
+          
+          if (Math.abs(distanceDiff) >= 0.5) {
+            const MAX_SPEED_PER_FRAME = 10;
+            const step = Math.sign(distanceDiff) * Math.min(Math.abs(distanceDiff), MAX_SPEED_PER_FRAME);
+            const newDistance = Math.max(0, Math.min(currentDistance + step, path.totalLength));
+            const newPosition = positionFromDistance(newDistance, path.lut);
+            const newDate = distanceToDate(newDistance, path.startOffset);
+            
+            setMarker({
+              ...marker,
+              position: newPosition,
+              pathDistance: newDistance,
+              date: newDate
+            });
+          }
+        }
+        
         clearCanvas(markerCtx, dimensions.width, dimensions.height);
         drawMarker(markerCtx, marker.position, MARKER_RADIUS, 'rgba(0, 0, 0, 0.1)', marker.isDragging);
         
@@ -177,9 +199,9 @@ function App() {
     }
 
     if (marker.isDragging) {
-      handleDragMove(x, y, marker, path, setMarker);
+      targetDistanceRef.current = handleDragMove(x, y, marker, path);
     } else if (activeDrawButton) {
-      handleDrawMove(x, y, activeDrawButton, path, endButtons, setPath, setEndButtons);
+      handleDrawMove(x, y, activeDrawButton, path, endButtons, marker, setPath, setEndButtons, setMarker);
     }
   };
 
@@ -188,8 +210,9 @@ function App() {
 
     if (marker.isDragging) {
       handleDragEnd(marker, setMarker);
+      targetDistanceRef.current = null;
     } else if (activeDrawButton) {
-      handleDrawEnd(activeDrawButton, path, setPath, setEndButtons);
+      handleDrawEnd(activeDrawButton, path, marker, setPath, setEndButtons, setMarker);
       setActiveDrawButton(null);
     }
   };

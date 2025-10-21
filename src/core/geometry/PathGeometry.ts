@@ -25,7 +25,8 @@ export function createInitialPath(
     totalLength: lut[lut.length - 1].distance,
     bounds,
     spatialGrid,
-    intersections: []
+    intersections: [],
+    startOffset: 0
   };
 }
 
@@ -37,7 +38,8 @@ export function addPathSegment(pathData: Path, point: Point): Path {
   
   return {
     ...pathData,
-    segments: newSegments
+    segments: newSegments,
+    startOffset: pathData.startOffset
   };
 }
 
@@ -49,7 +51,8 @@ export function prependPathSegment(pathData: Path, point: Point): Path {
   
   return {
     ...pathData,
-    segments: newSegments
+    segments: newSegments,
+    startOffset: pathData.startOffset
   };
 }
 
@@ -65,7 +68,8 @@ export function finalizePath(pathData: Path): Path {
     totalLength: lut.length > 0 ? lut[lut.length - 1].distance : 0,
     bounds,
     spatialGrid,
-    intersections
+    intersections,
+    startOffset: pathData.startOffset
   };
 }
 

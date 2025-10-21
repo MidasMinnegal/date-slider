@@ -1,6 +1,7 @@
-import { addPathSegment, prependPathSegment, finalizePath } from '@/core/geometry/PathGeometry';
+import { addPathSegment, prependPathSegment, finalizePath, positionFromDistance } from '@/core/geometry/PathGeometry';
+import { distanceToDate } from '@/core/state/DateCalculations';
 import { END_BUTTON_RADIUS } from '@/types';
-import type { EndButton, Path } from '@/types';
+import type { EndButton, Path, Marker } from '@/types';
 
 export function isPointInEndButton(x: number, y: number, button: EndButton): boolean {
   const dx = x - button.center.x;
@@ -33,15 +34,39 @@ export function handleDrawMove(
   activeButton: EndButton | null,
   path: Path,
   endButtons: EndButton[],
+  marker: Marker,
   setPath: (path: Path) => void,
-  setEndButtons: (buttons: EndButton[]) => void
+  setEndButtons: (buttons: EndButton[]) => void,
+  setMarker: (marker: Marker) => void
 ): void {
   if (!activeButton) return;
 
   const newPath = activeButton.type === 'start'
     ? prependPathSegment(path, { x, y })
     : addPathSegment(path, { x, y });
-  setPath(newPath);
+  
+  if (activeButton.type === 'start' && newPath.segments.length >= 4) {
+    const lengthAdded = Math.sqrt(
+      Math.pow(newPath.segments[2] - newPath.segments[0], 2) + 
+      Math.pow(newPath.segments[3] - newPath.segments[1], 2)
+    );
+    
+    const newStartOffset = newPath.startOffset - lengthAdded;
+    const newMarkerDistance = marker.pathDistance + lengthAdded;
+    
+    setPath({
+      ...newPath,
+      startOffset: newStartOffset
+    });
+    
+    setMarker({
+      ...marker,
+      pathDistance: newMarkerDistance,
+      date: distanceToDate(newMarkerDistance, newStartOffset)
+    });
+  } else {
+    setPath(newPath);
+  }
 
   const updatedButtons = endButtons.map(b => {
     if (b.type === activeButton.type) {
@@ -58,8 +83,10 @@ export function handleDrawMove(
 export function handleDrawEnd(
   activeButton: EndButton | null,
   path: Path,
+  marker: Marker,
   setPath: (path: Path) => void,
-  setEndButtons: (buttons: EndButton[]) => void
+  setEndButtons: (buttons: EndButton[]) => void,
+  setMarker: (marker: Marker) => void
 ): void {
   if (!activeButton) return;
 
@@ -88,4 +115,13 @@ export function handleDrawEnd(
   ];
 
   setEndButtons(updatedButtons);
+  
+  const updatedPosition = positionFromDistance(marker.pathDistance, finalPath.lut);
+  const updatedDate = distanceToDate(marker.pathDistance, finalPath.startOffset);
+  
+  setMarker({
+    ...marker,
+    position: updatedPosition,
+    date: updatedDate
+  });
 }

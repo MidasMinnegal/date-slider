@@ -1,5 +1,4 @@
-import { distanceFromPosition, positionFromDistance } from '@/core/geometry/PathGeometry';
-import { distanceToDate } from '@/core/state/DateCalculations';
+import { distanceFromPosition } from '@/core/geometry/PathGeometry';
 import { MARKER_RADIUS } from '@/types';
 import type { Marker, Path } from '@/types';
 
@@ -33,30 +32,19 @@ export function handleDragMove(
   x: number,
   y: number,
   marker: Marker,
-  path: Path,
-  setMarker: (marker: Marker) => void
-): void {
-  if (!marker.isDragging) return;
+  path: Path
+): number {
+  if (!marker.isDragging) return marker.pathDistance;
 
   const adjustedX = x - marker.dragOffset.x;
   const adjustedY = y - marker.dragOffset.y;
 
-  const newDistance = distanceFromPosition(
+  const targetDistance = distanceFromPosition(
     { x: adjustedX, y: adjustedY },
     path
   );
 
-  const clampedDistance = Math.max(0, Math.min(newDistance, path.totalLength));
-
-  const newPosition = positionFromDistance(clampedDistance, path.lut);
-  const newDate = distanceToDate(clampedDistance);
-
-  setMarker({
-    ...marker,
-    position: newPosition,
-    pathDistance: clampedDistance,
-    date: newDate
-  });
+  return Math.max(0, Math.min(targetDistance, path.totalLength));
 }
 
 export function handleDragEnd(

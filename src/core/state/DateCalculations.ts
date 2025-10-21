@@ -20,12 +20,12 @@ export function isValidDate(date: Date): boolean {
   return date instanceof Date && !isNaN(date.getTime());
 }
 
-export function distanceToDate(distance: number): Date {
+export function distanceToDate(distance: number, startOffset: number = 0): Date {
   if (!Number.isFinite(distance)) {
     throw new Error('Distance must be finite number');
   }
   
-  const daysSinceBase = Math.round(distance / PIXELS_PER_DAY);
+  const daysSinceBase = Math.round((distance + startOffset) / PIXELS_PER_DAY);
   const result = new Date(BASE_DATE);
   result.setDate(result.getDate() + daysSinceBase);
   

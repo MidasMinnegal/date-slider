@@ -31,6 +31,7 @@ export type Path = {
   bounds: PathBounds;
   spatialGrid: Map<string, number[]>;
   intersections: PathIntersection[];
+  startOffset: number;
 };
 
 export type Marker = {
