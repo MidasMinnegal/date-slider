@@ -27,7 +27,7 @@ A user opens the datepicker interface and sees a horizontal slider on a canvas. 
 
 **Acceptance Scenarios**:
 
-1. **Given** the datepicker loads, **When** the user views the canvas, **Then** the slider is 200px wide and the marker is positioned in the center displaying "January 1, 1900"
+1. **Given** the datepicker loads, **When** the user views the canvas, **Then** the slider is 200px wide, centered on the screen, and the marker is positioned in the center of the slider displaying "January 1, 1900"
 2. **Given** the marker is at January 1, 1900, **When** the user drags it 1px to the right, **Then** the date increases to January 2, 1900
 3. **Given** the marker is at January 1, 1900, **When** the user drags it 1px to the left, **Then** the date decreases to December 31, 1899
 4. **Given** the marker is at any position, **When** the user drags it continuously, **Then** the date updates smoothly with each pixel of movement
@@ -83,7 +83,7 @@ After extending the slider through drawing, the user can drag the date marker al
 
 ### Functional Requirements
 
-- **FR-001**: System MUST display a canvas with a horizontal slider that is 200px wide by default
+- **FR-001**: System MUST display a canvas with a horizontal slider that is 200px wide by default, centered on the screen
 - **FR-002**: System MUST initialize the date marker at the center of the slider displaying January 1, 1900
 - **FR-003**: System MUST decrease the displayed date by one day for every 1 pixel the marker moves to the left
 - **FR-004**: System MUST increase the displayed date by one day for every 1 pixel the marker moves to the right
@@ -128,4 +128,5 @@ After extending the slider through drawing, the user can drag the date marker al
 - Drawing creates straight line segments following the cursor path (not freehand curves requiring smoothing)
 - Visual styling (colors, fonts, sizes) will be determined during implementation
 - The canvas fills the entire viewport (fullscreen) providing ample space for drawing extensions
+- The slider initializes centered horizontally and vertically on the screen
 - The date format uses spelled out month names for maximum readability
